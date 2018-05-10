@@ -1,7 +1,25 @@
-reference:
+# Kaggle Competition: TalkingData AdTracking Fraud Detection Challenge
 
-IP address encoding issues: https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/52374
+Authors: **Kevin Liao**
 
-EDA: https://www.kaggle.com/pranav84/talkingdata-eda-to-model-evaluation-lb-0-9683
+### Not So Important Note
 
-FM_FTRL: https://www.kaggle.com/anttip/talkingdata-wordbatch-fm-ftrl-lb-0-9752/code
+This folder is responsible for storing raw data. However, it is NOT for reproducible purpose and those csv files are empty files. This is just simply a competition project skeleton demo
+
+Below is where you can download the **real** data from *kaggle*
+
+Raw Data Source: [TalkingData](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/data)
+
+### File Structure
+
+* `data`, which supposely stores the original data set `train.csv`, `test.csv`, and `test_supplement.csv` 
+
+The complete file-structure for this folder is as follows:
+
+```
+  data/
+      README.md
+      train.csv
+      test.csv
+      test_supplement.csv
+```
