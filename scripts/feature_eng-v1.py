@@ -1,8 +1,15 @@
+import os
+import psutil
 import time
 import numpy as np
 import pandas as pd
 import gc
 
+# memory status
+process = psutil.Process(os.getpid())
+memused = process.memory_info().rss
+print('Total memory in use before reading data: {:.02f} GB '
+      ''.format(memused / (2 ** 30)))
 
 t0 = time.time()
 # spec for train
@@ -48,6 +55,11 @@ df_test_submit = pd.read_csv(
     parse_dates=['click_time'],
     infer_datetime_format=True,
 )
+# memory status
+memused = process.memory_info().rss
+print('Total memory in use after reading data: {:.02f} GB '
+      ''.format(memused / (2 ** 30)))
+
 # set features and targets
 features = ['ip', 'app', 'os', 'device', 'channel', 'click_time']
 target = 'is_attributed'
@@ -55,10 +67,6 @@ target = 'is_attributed'
 """
 NOTE:
 new_features = [
-    'app',
-    'device',
-    'os',
-    'channel',
     'hour',
     'dow',
     'doy',

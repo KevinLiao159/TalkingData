@@ -1,57 +1,64 @@
-from sys import getsizeof
+import os
+import psutil
 import time
 import numpy as np
 import pandas as pd
 import gc
 
-# sklearn
-from sklearn.model_selection import train_test_split
-
-# gravity imports
-import gravity_learn.utils as gu
+# memory status
+process = psutil.Process(os.getpid())
+memused = process.memory_info().rss
+print('Total memory in use before reading data: {:.02f} GB '
+      ''.format(memused / (2 ** 30)))
 
 t0 = time.time()
 # spec for train
-train_columns = ['ip', 'app', 'device', 'os', 'channel', 'click_time', 'is_attributed']
-test_columns  = ['ip', 'app', 'device', 'os', 'channel', 'click_time', 'click_id']
-dtype = {  
-    'ip'            : 'uint32',
-    'app'           : 'uint16',
-    'device'        : 'uint16',
-    'os'            : 'uint16',
-    'channel'       : 'uint16',
-    'is_attributed' : 'uint16',
-    'click_id'      : 'uint32'
+train_columns = \
+    ['ip', 'app', 'device', 'os', 'channel', 'click_time', 'is_attributed']
+test_columns = \
+    ['ip', 'app', 'device', 'os', 'channel', 'click_time', 'click_id']
+dtype = {
+    'ip': 'uint32',
+    'app': 'uint16',
+    'device': 'uint16',
+    'os': 'uint16',
+    'channel': 'uint16',
+    'is_attributed': 'uint16',
+    'click_id': 'uint32'
 }
 # read data
 df_train = pd.read_csv(
-    filepath_or_buffer="./input/train.csv",
+    filepath_or_buffer="../data/train.csv",
     usecols=train_columns,
     dtype=dtype,
     low_memory=True,
     parse_dates=['click_time'],
-    infer_datetime_format=True, 
-#     skiprows=range(1,122070801),
-#     nrows=62832641
+    infer_datetime_format=True,
+    # skiprows=range(1, 122070801),
+    # nrows=62832641
 )
 df_test = pd.read_csv(
-    filepath_or_buffer="./input/test_supplement.csv",
+    filepath_or_buffer="../data/test_supplement.csv",
     usecols=test_columns,
     dtype=dtype,
     low_memory=True,
     parse_dates=['click_time'],
     infer_datetime_format=True,
-#     skiprows=range(1,633),
-#     nrows=57537505
+    # skiprows=range(1, 633),
+    # nrows=57537505
 )
 df_test_submit = pd.read_csv(
-    filepath_or_buffer="./input/test.csv",
+    filepath_or_buffer="../data/test.csv",
     usecols=test_columns,
     dtype=dtype,
     low_memory=True,
     parse_dates=['click_time'],
-    infer_datetime_format=True, 
+    infer_datetime_format=True,
 )
+# memory status
+memused = process.memory_info().rss
+print('Total memory in use after reading data: {:.02f} GB '
+      ''.format(memused / (2 ** 30)))
 
 # set features and targets
 features = ['ip', 'app', 'os', 'device', 'channel', 'click_time']
@@ -135,7 +142,7 @@ others_list = ['app', 'os', 'device', 'channel']
 for col in others_list:
     group = ['ip', col, 'day', 'hour']
     df = df_concat.groupby(group).size().astype('uint16')
-    df = pd.DataFrame(df, columns=['ip_{}_day_hour_clicks'.format(col)]).reset_index()
+    df = pd.DataFrame(df, columns=['ip_{}_day_hour_clicks'.format(col)]).reset_index()   # noqa
     df_train = df_train.merge(df, how='left', on=group)
     df_test_submit = df_test_submit.merge(df, how='left', on=group)
 
@@ -150,7 +157,7 @@ others_list = ['os', 'device', 'channel']
 for col in others_list:
     group = ['app', col, 'day', 'hour']
     df = df_concat.groupby(group).size().astype('uint16')
-    df = pd.DataFrame(df, columns=['app_{}_day_hour_clicks'.format(col)]).reset_index()
+    df = pd.DataFrame(df, columns=['app_{}_day_hour_clicks'.format(col)]).reset_index()   # noqa
     df_train = df_train.merge(df, how='left', on=group)
     df_test_submit = df_test_submit.merge(df, how='left', on=group)
 
@@ -169,7 +176,7 @@ others_list = ['app', 'os', 'device', 'channel']
 for col in others_list:
     group = ['ip', col, 'day']
     df = df_concat.groupby(group).size().astype('uint16')
-    df = pd.DataFrame(df, columns=['ip_{}_day_clicks'.format(col)]).reset_index()
+    df = pd.DataFrame(df, columns=['ip_{}_day_clicks'.format(col)]).reset_index()   # noqa
     df_train = df_train.merge(df, how='left', on=group)
     df_test_submit = df_test_submit.merge(df, how='left', on=group)
 
@@ -184,7 +191,7 @@ others_list = ['os', 'device', 'channel']
 for col in others_list:
     group = ['app', col, 'day']
     df = df_concat.groupby(group).size().astype('uint16')
-    df = pd.DataFrame(df, columns=['app_{}_day_clicks'.format(col)]).reset_index()
+    df = pd.DataFrame(df, columns=['app_{}_day_clicks'.format(col)]).reset_index()   # noqa
     df_train = df_train.merge(df, how='left', on=group)
     df_test_submit = df_test_submit.merge(df, how='left', on=group)
 
