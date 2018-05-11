@@ -1,16 +1,19 @@
+import os
+import psutil
 import time
 import gc
 import numpy as np
 import pandas as pd
-# sklearn imports
-from sklearn.metrics.scorer import roc_auc_scorer, roc_auc_score
-from sklearn.model_selection import train_test_split
 import lightgbm
-# gravity imports
-import gravity_learn.utils as gu
+
+# memory status
+process = psutil.Process(os.getpid())
+memused = process.memory_info().rss
+print('Total memory in use before reading data: {:.02f} GB '
+      ''.format(memused / (2 ** 30)))
 
 # read data
-df_train = pd.read_pickle('./input/train_v5.pkl')
+df_train = pd.read_hdf('../data/train_v2.hdf')
 # col
 target = 'is_attributed'
 features = [
@@ -48,7 +51,7 @@ categorical_features = [
 ]
 # prep data
 dtrain = lightgbm.Dataset(
-    df_train[features].values, 
+    df_train[features].values,
     label=df_train[target].values,
     feature_name=features,
     categorical_feature=categorical_features,
@@ -57,6 +60,10 @@ dtrain = lightgbm.Dataset(
 del df_train
 gc.collect()
 print('done data prep!!!')
+# memory status
+memused = process.memory_info().rss
+print('Total memory in use after reading data: {:.02f} GB '
+      ''.format(memused / (2 ** 30)))
 
 t0 = time.time()
 ###################################################################
@@ -83,30 +90,30 @@ params = {
 }
 # train
 model = lightgbm.train(
-    params=params, 
+    params=params,
     train_set=dtrain,
     num_boost_round=2800,
     feature_name=features,
     categorical_feature=categorical_features,
     verbose_eval=1,
-    init_model='model_lgb_v5.txt'
+    # init_model='model_v2.txt'
 )
 ####################################################################
 t1 = time.time()
 t_min = np.round((t1-t0) / 60, 2)
 print('It took {} mins to train model'.format(t_min))
 # save model
-# model.save_model('model_lgb_v5.txt')
+# model.save_model('model_v2.txt')
 # clean up
 del dtrain
 gc.collect()
 ####################################################################
 # submit
-df_test = pd.read_pickle('./input/test_v5.pkl')
+df_test = pd.read_hdf('../data/test_v2.hdf')
 # pred
 df_test['is_attributed'] = model.predict(df_test[features])
 # create submission
 sub_cols = ['click_id', 'is_attributed']
 df_sub = df_test[sub_cols]
 # save
-df_sub.to_csv('./input/lightGBM_v5.1.csv', index=False)
+df_sub.to_csv('../data/submission_v2.csv', index=False)

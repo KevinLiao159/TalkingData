@@ -150,12 +150,16 @@ new_features = [
 ]
 
 # train
-df_train[new_features + ['is_attributed']].to_pickle('./input/train_v4.pkl')
-
+df_train[new_features + ['is_attributed']] \
+    .to_hdf('./input/train_v1.hdf', key='train', data_columns=True)
+#     .astype('float32') \
 del df_train
 gc.collect()
 # test
-df_test_submit[new_features + ['click_id']].to_pickle('./input/test_v4.pkl')
+df_test_submit[new_features + ['click_id']] \
+    .to_hdf('./input/test_v1.hdf', key='test', data_columns=True)
+#     .astype('float32') \
+
 del df_test_submit
 gc.collect()
 t1 = time.time()

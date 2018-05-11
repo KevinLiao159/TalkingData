@@ -1,12 +1,22 @@
+import os
+import psutil
 import time
 import numpy as np
 import pandas as pd
 import gc
 
+# memory status
+process = psutil.Process(os.getpid())
+memused = process.memory_info().rss
+print('Total memory in use before reading data: {:.02f} GB '
+      ''.format(memused / (2 ** 30)))
+
 t0 = time.time()
 # spec for train
-train_columns = ['ip', 'app', 'device', 'os', 'channel', 'click_time', 'is_attributed']
-test_columns = ['ip', 'app', 'device', 'os', 'channel', 'click_time', 'click_id']
+train_columns = \
+    ['ip', 'app', 'device', 'os', 'channel', 'click_time', 'is_attributed']
+test_columns = \
+    ['ip', 'app', 'device', 'os', 'channel', 'click_time', 'click_id']
 dtype = {
     'ip': 'uint32',
     'app': 'uint16',
@@ -18,33 +28,37 @@ dtype = {
 }
 # read data
 df_train = pd.read_csv(
-    filepath_or_buffer="./input/train.csv",
+    filepath_or_buffer="../data/train.csv",
     usecols=train_columns,
     dtype=dtype,
     low_memory=True,
     parse_dates=['click_time'],
     infer_datetime_format=True,
-#     skiprows=range(1, 59709852),
-#     nrows=62832641
+    # skiprows=range(1, 122070801),
+    # nrows=62832641
 )
 df_test = pd.read_csv(
-    filepath_or_buffer="./input/test_supplement.csv",
+    filepath_or_buffer="../data/test_supplement.csv",
     usecols=test_columns,
     dtype=dtype,
     low_memory=True,
     parse_dates=['click_time'],
     infer_datetime_format=True,
-#     skiprows=range(1,633),
-#     nrows=57537505
+    # skiprows=range(1, 633),
+    # nrows=57537505
 )
 df_test_submit = pd.read_csv(
-    filepath_or_buffer="./input/test.csv",
+    filepath_or_buffer="../data/test.csv",
     usecols=test_columns,
     dtype=dtype,
     low_memory=True,
     parse_dates=['click_time'],
     infer_datetime_format=True,
 )
+# memory status
+memused = process.memory_info().rss
+print('Total memory in use after reading data: {:.02f} GB '
+      ''.format(memused / (2 ** 30)))
 
 # set features and targets
 features = ['ip', 'app', 'os', 'device', 'channel', 'click_time']
@@ -151,7 +165,7 @@ others_list = ['app', 'os', 'device']
 for col in others_list:
     group = ['ip', col, 'day', 'hour']
     df = df_concat.groupby(group).size().astype('uint16')
-    df = pd.DataFrame(df, columns=['ip_{}_day_hour_clicks'.format(col)]).reset_index()
+    df = pd.DataFrame(df, columns=['ip_{}_day_hour_clicks'.format(col)]).reset_index()    # noqa
     df_train = df_train.merge(df, how='left', on=group)
     df_test_submit = df_test_submit.merge(df, how='left', on=group)
 
@@ -302,16 +316,16 @@ df_test_submit = df_test_submit.merge(df, how='left', on=group_day)
 group_day_cols = ['app', 'device', 'os', 'channel']
 col = 'hour'
 for group in group_day_cols:
-    df = df_concat.groupby(['ip', group, 'day'])[col].var().fillna(0).astype('float32')
+    df = df_concat.groupby(['ip', group, 'day'])[col].var().fillna(0).astype('float32')      # noqa
     df.name = 'ip_{}_day_var_hour'.format(group)
     df = pd.DataFrame(df).reset_index()
     df_train = df_train.merge(df, how='left', on=['ip', group, 'day'])
-    df_test_submit = df_test_submit.merge(df, how='left', on=['ip', group, 'day'])
+    df_test_submit = df_test_submit.merge(df, how='left', on=['ip', group, 'day'])           # noqa
 
 # ip_app_os_var_hour
 group = 'os'
 col = 'hour'
-df = df_concat.groupby(['ip', 'app', group])[col].var().fillna(0).astype('float32')
+df = df_concat.groupby(['ip', 'app', group])[col].var().fillna(0).astype('float32')          # noqa
 df.name = 'ip_app_{}_var_{}'.format(group, col)
 df = pd.DataFrame(df).reset_index()
 df_train = df_train.merge(df, how='left', on=['ip', 'app', group])
@@ -320,7 +334,7 @@ df_test_submit = df_test_submit.merge(df, how='left', on=['ip', 'app', group])
 # ip_app_channel_var_day
 group = 'channel'
 col = 'day'
-df = df_concat.groupby(['ip', 'app', group])[col].var().fillna(0).astype('float32')
+df = df_concat.groupby(['ip', 'app', group])[col].var().fillna(0).astype('float32')          # noqa
 df.name = 'ip_app_{}_var_{}'.format(group, col)
 df = pd.DataFrame(df).reset_index()
 df_train = df_train.merge(df, how='left', on=['ip', 'app', group])
@@ -329,7 +343,7 @@ df_test_submit = df_test_submit.merge(df, how='left', on=['ip', 'app', group])
 # ip_app_channel_mean_hour
 group = 'channel'
 col = 'hour'
-df = df_concat.groupby(['ip', 'app', group])[col].mean().fillna(0).astype('float32')
+df = df_concat.groupby(['ip', 'app', group])[col].mean().fillna(0).astype('float32')         # noqa
 df.name = 'ip_app_{}_mean_{}'.format(group, col)
 df = pd.DataFrame(df).reset_index()
 df_train = df_train.merge(df, how='left', on=['ip', 'app', group])
@@ -348,66 +362,81 @@ gc.collect()
 group = ['ip']
 new_col = '{}_cumcount'.format(group[0])
 df_train = df_train.sort_values(group + ['click_time'])
-df_train[new_col] = \
-    df_train.groupby(group, sort=True).apply(lambda x: pd.Series(np.arange(len(x)))).astype('uint16').values
+df_train[new_col] = df_train.groupby(group, sort=True) \
+    .apply(lambda x: pd.Series(np.arange(len(x)))) \
+    .astype('uint16').values
 df_test_submit = df_test_submit.sort_values(group + ['click_time'])
-df_test_submit[new_col] = \
-    df_test_submit.groupby(group, sort=True).apply(lambda x: pd.Series(np.arange(len(x)))).astype('uint16').values
+df_test_submit[new_col] = df_test_submit \
+    .groupby(group, sort=True) \
+    .apply(lambda x: pd.Series(np.arange(len(x)))) \
+    .astype('uint16').values
 #####################
 # self-add
 # ip_day_cumcount
 group = ['ip', 'day']
 new_col = '{}_{}_cumcount'.format(group[0], group[1])
 df_train = df_train.sort_values(group + ['click_time'])
-df_train[new_col] = \
-    df_train.groupby(group, sort=True).apply(lambda x: pd.Series(np.arange(len(x)))).astype('uint16').values
+df_train[new_col] = df_train.groupby(group, sort=True) \
+    .apply(lambda x: pd.Series(np.arange(len(x)))) \
+    .astype('uint16').values
 df_test_submit = df_test_submit.sort_values(group + ['click_time'])
-df_test_submit[new_col] = \
-    df_test_submit.groupby(group, sort=True).apply(lambda x: pd.Series(np.arange(len(x)))).astype('uint16').values
+df_test_submit[new_col] = df_test_submit.groupby(group, sort=True) \
+    .apply(lambda x: pd.Series(np.arange(len(x)))) \
+    .astype('uint16').values
 #####################
 
 # ip_app_cumcount
 group = ['ip', 'app']
 new_col = '{}_{}_cumcount'.format(group[0], group[1])
 df_train = df_train.sort_values(group + ['click_time'])
-df_train[new_col] = \
-    df_train.groupby(group, sort=True).apply(lambda x: pd.Series(np.arange(len(x)))).astype('uint16').values
+df_train[new_col] = df_train.groupby(group, sort=True) \
+    .apply(lambda x: pd.Series(np.arange(len(x)))) \
+    .astype('uint16').values
 df_test_submit = df_test_submit.sort_values(group + ['click_time'])
 df_test_submit[new_col] = \
-    df_test_submit.groupby(group, sort=True).apply(lambda x: pd.Series(np.arange(len(x)))).astype('uint16').values
+    df_test_submit.groupby(group, sort=True) \
+    .apply(lambda x: pd.Series(np.arange(len(x)))) \
+    .astype('uint16').values
 #####################
 # self-add
 # ip_day_cumcount
 group = ['ip', 'app', 'day']
 new_col = '{}_{}_{}_cumcount'.format(group[0], group[1], group[2])
 df_train = df_train.sort_values(group + ['click_time'])
-df_train[new_col] = \
-    df_train.groupby(group, sort=True).apply(lambda x: pd.Series(np.arange(len(x)))).astype('uint16').values
+df_train[new_col] = df_train.groupby(group, sort=True) \
+    .apply(lambda x: pd.Series(np.arange(len(x)))) \
+    .astype('uint16').values
 df_test_submit = df_test_submit.sort_values(group + ['click_time'])
-df_test_submit[new_col] = \
-    df_test_submit.groupby(group, sort=True).apply(lambda x: pd.Series(np.arange(len(x)))).astype('uint16').values
+df_test_submit[new_col] = df_test_submit.groupby(group, sort=True) \
+    .apply(lambda x: pd.Series(np.arange(len(x)))) \
+    .astype('uint16').values
 #####################
 
 # ip_device_os_cumcount
 group = ['ip', 'device', 'os']
 new_col = '{}_{}_{}_cumcount'.format(group[0], group[1], group[2])
 df_train = df_train.sort_values(group + ['click_time'])
-df_train[new_col] = \
-    df_train.groupby(group, sort=True).apply(lambda x: pd.Series(np.arange(len(x)))).astype('uint16').values
+df_train[new_col] = df_train.groupby(group, sort=True) \
+    .apply(lambda x: pd.Series(np.arange(len(x)))) \
+    .astype('uint16').values
 df_test_submit = df_test_submit.sort_values(group + ['click_time'])
-df_test_submit[new_col] = \
-    df_test_submit.groupby(group, sort=True).apply(lambda x: pd.Series(np.arange(len(x)))).astype('uint16').values
+df_test_submit[new_col] = df_test_submit.groupby(group, sort=True) \
+    .apply(lambda x: pd.Series(np.arange(len(x)))) \
+    .astype('uint16').values
 #####################
 # self-add
 # ip_day_cumcount
 group = ['ip', 'device', 'os', 'day']
 new_col = '{}_{}_{}_{}_cumcount'.format(group[0], group[1], group[2], group[3])
 df_train = df_train.sort_values(group + ['click_time'])
-df_train[new_col] = \
-    df_train.groupby(group, sort=True).apply(lambda x: pd.Series(np.arange(len(x)))).astype('uint16').values
+df_train[new_col] = df_train.groupby(group, sort=True) \
+    .apply(lambda x: pd.Series(np.arange(len(x)))) \
+    .astype('uint16').values
 df_test_submit = df_test_submit.sort_values(group + ['click_time'])
 df_test_submit[new_col] = \
-    df_test_submit.groupby(group, sort=True).apply(lambda x: pd.Series(np.arange(len(x)))).astype('uint16').values
+    df_test_submit.groupby(group, sort=True) \
+    .apply(lambda x: pd.Series(np.arange(len(x)))) \
+    .astype('uint16').values
 #####################
 
 # sort index to restore
@@ -421,14 +450,20 @@ df_test_submit = df_test_submit.sort_index()
 
 def compute_next_click(_df):
     df = _df[['ip', 'app', 'device', 'os', 'click_time']].copy()
-    df['click_time'] = (df['click_time'].astype(np.int64, copy=False) // 10 ** 9).astype(np.int32, copy=False)
-    return (df.groupby(['ip', 'app', 'device', 'os']).click_time.shift(-1) - df.click_time).astype(np.float32, copy=False)
+    df['click_time'] = \
+        (df['click_time'].astype(np.int64, copy=False) // 10 ** 9).astype(np.int32, copy=False)    # noqa
+    return (
+        df.groupby(['ip', 'app', 'device', 'os']).click_time.shift(-1) - df.click_time    # noqa
+        ).astype(np.float32, copy=False)
 
 
 def compute_previous_click(_df):
     df = _df[['ip', 'app', 'device', 'os', 'click_time']].copy()
-    df['click_time'] = (df['click_time'].astype(np.int64, copy=False) // 10 ** 9).astype(np.int32, copy=False)
-    return (df.click_time - df.groupby(['ip', 'app', 'device', 'os']).click_time.shift(1)).astype(np.float32, copy=False)
+    df['click_time'] = \
+        (df['click_time'].astype(np.int64, copy=False) // 10 ** 9).astype(np.int32, copy=False)    # noqa
+    return (
+        df.click_time - df.groupby(['ip', 'app', 'device', 'os']).click_time.shift(1)    # noqa
+        ).astype(np.float32, copy=False)
 
 
 # add next_click
@@ -508,13 +543,13 @@ new_features = [
 
 # train
 df_train[new_features + ['is_attributed']] \
-    .to_hdf('./input/train_v6.3.hdf', key='train', data_columns=True)
+    .to_hdf('./input/train_v3.hdf', key='train', data_columns=True)
 #     .astype('float32') \
 del df_train
 gc.collect()
 # test
 df_test_submit[new_features + ['click_id']] \
-    .to_hdf('./input/test_v6.3.hdf', key='test', data_columns=True)
+    .to_hdf('./input/test_v3.hdf', key='test', data_columns=True)
 #     .astype('float32') \
 
 del df_test_submit

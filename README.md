@@ -28,6 +28,12 @@ TalkingData/
         train.csv
         test.csv
         test_supplement.csv
+        train_v1.hdf
+        test_v1.hdf
+        train_v2.hdf
+        test_v2.hdf
+        train_v3.hdf
+        test_v3.hdf
     scripts/
         feature_eng-v1.py
         train_xgb-v1.py

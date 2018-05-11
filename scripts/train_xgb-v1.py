@@ -1,23 +1,26 @@
+import os
+import psutil
 import time
 import gc
 import numpy as np
 import pandas as pd
-# sklearn imports
-from sklearn.metrics.scorer import roc_auc_scorer, roc_auc_score
-from sklearn.model_selection import train_test_split
 import xgboost
-# gravity imports
-import gravity_learn.utils as gu
+
+# memory status
+process = psutil.Process(os.getpid())
+memused = process.memory_info().rss
+print('Total memory in use before reading data: {:.02f} GB '
+      ''.format(memused / (2 ** 30)))
 
 # read data
-df_train = pd.read_pickle('./input/train_v4.pkl')
+df_train = pd.read_hdf('../data/train_v1.hdf')
 # col
 target = 'is_attributed'
 features = [
-    'app', 
-    'device', 
-    'os', 
-    'channel', 
+    'app',
+    'device',
+    'os',
+    'channel',
     'dow',
     'doy',
     'ip_clicks',
@@ -35,6 +38,10 @@ dtrain = xgboost.DMatrix(df_train[features], df_train[target])
 del df_train
 gc.collect()
 print('done data prep!!!')
+# memory status
+memused = process.memory_info().rss
+print('Total memory in use after reading data: {:.02f} GB '
+      ''.format(memused / (2 ** 30)))
 
 t0 = time.time()
 ###################################################################
@@ -59,7 +66,7 @@ params = {
 }
 # train
 model = xgboost.train(
-    params=params, 
+    params=params,
     dtrain=dtrain,
     num_boost_round=145,
     maximize=True,
@@ -69,18 +76,17 @@ model = xgboost.train(
 t1 = time.time()
 t_min = np.round((t1-t0) / 60, 2)
 print('It took {} mins to train model'.format(t_min))
-# save model
-gu.save_object(model, 'xgb_v4.1.pkl')
+
 # clean up
 del dtrain
 gc.collect()
 ####################################################################
 # submit
-df_test = pd.read_pickle('./input/test_v4.pkl')
+df_test = pd.read_hdf('../data/test_v1.hdf')
 # pred
 df_test['is_attributed'] = model.predict(xgboost.DMatrix(df_test[features]))
 # create submission
 sub_cols = ['click_id', 'is_attributed']
 df_sub = df_test[sub_cols]
 # save
-df_sub.to_csv('./input/XGB_v4.4.csv', index=False)
+df_sub.to_csv('../data/submission_v1.csv', index=False)
