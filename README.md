@@ -3,7 +3,7 @@
 Authors: **Kevin Liao**
 
 ### Objective 
-This repository is mainly about my learning experience in Kaggle Competition. It consists of python scripts (for model training and model selection) and jupyter notebook (for EDA). I hope beginers can find something useful in this repo. For me, I think I might re-use some of the tools from this repo as well.
+This repository is mainly about my learning experience in Kaggle Competition. It consists of python scripts (for feature engineering, model training and model selection) and jupyter notebook (for EDA). I hope beginers can find something useful in this repo. For me, I think I might recycle some of the tools in this repo as well.
 
 Competition Website: [TalkingData](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection)
 
