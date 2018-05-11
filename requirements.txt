@@ -1,0 +1,6 @@
+klearn==0.0.1
+lightgbm==2.1.1
+xgboost==0.7.post4
+bayesian-optimization==0.6.0
+shap==0.15.0
+Boruta==0.1.5

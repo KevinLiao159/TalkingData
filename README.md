@@ -50,19 +50,19 @@ TalkingData/
         SHAP_toy_example.html
         BayesOpt_toy_example.ipynb
         BayesOpt_toy_example.html
+        Boruta_algo_toy_example.ipynb
+        Boruta_algo_toy_example.html
     insample_iterations/
         README.md
         data/
-            train.pkl
-            test.pkl
-            test_supplement.csv
+            train_raw.hdf
+            test_raw.hdf
+            train.hdf
+            test.hdf
         scripts/
-            feature_eng-v1.py
-            train_xgb-v1.py
-            feature_eng-v2.py
-            train_lightgbm-v2.py
-            feature_eng-v3.py
-            train_lightgbm-v3.py
+            dump_in_sample_data.py
+            feature_eng.py
+            train_model.py
     images/
         ...too many
     reference/
