@@ -12,6 +12,7 @@ Competition Website: [TalkingData](https://www.kaggle.com/c/talkingdata-adtracki
 The main directories of this repository are:
 * `data`, which stores the original data set `train.csv`, `test.csv`, and `test_supplement.csv`
 * `scripts`, which holds the meat for the competition. It includes feature engineering and model trainning/prediction
+* `models`, which stores trained models (trained object)
 * `eda_nb`, which stores jupyter notebooks and HTML for some EDA process and output
 * `insample_iterations`, which is reponsible for in-sample model selection, tuning and evaluations
 * `images`, which stores the graphic output for EDA
@@ -42,6 +43,8 @@ TalkingData/
         train_lightgbm-v2.py
         feature_eng-v3.py
         train_lightgbm-v3.py
+    models/
+        model_lgbm.txt
     eda_nb/
         basic_EDA.ipynb
         basic_EDA.html
