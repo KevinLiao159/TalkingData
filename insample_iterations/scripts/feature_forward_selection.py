@@ -2,25 +2,30 @@ import time
 import gc
 import numpy as np
 import pandas as pd
-import itertools
 import operator
 # sklearn imports
-from sklearn.metrics.scorer import roc_auc_scorer, roc_auc_score
-from sklearn.model_selection import train_test_split
+from sklearn.metrics.scorer import roc_auc_score
 import xgboost
-# gravity imports
-import gravity_learn.utils as gu
+# klearn imports
+import klearn.utils as gu
 
+######################################
+# Idea:
+# 1. include only base features
+# 2  adding a feature with the most improvement in out-of-sample score once a time  # noqa
+# 3. we can see that out-of-sample score starts to decrease after peaking at a set of features # noqa
+# 4. prune those features after that peak
+######################################
 # read data
-df_train = pd.read_pickle('./input/train_v4.pkl')
-df_test = pd.read_pickle('./input/test_v4.pkl')
+df_train = pd.read_hdf('../data/train.hdf').astype('float32')
+df_test = pd.read_hdf('../data/test.hdf').astype('float32')
 # col
 target = 'is_attributed'
 features = [
-    'app', 
-    'device', 
-    'os', 
-    'channel', 
+    'app',
+    'device',
+    'os',
+    'channel',
     'dow',
     'doy',
     'ip_clicks'
@@ -40,10 +45,10 @@ params = {
     'tree_method': "hist",
     'grow_policy': "lossguide",
     'max_leaves': 1400,
-    'eta': 0.3, 
+    'eta': 0.3,
     'max_depth': 0,
-    'subsample': 0.9,        
-    'colsample_bytree': 0.7, 
+    'subsample': 0.9,
+    'colsample_bytree': 0.7,
     'colsample_bylevel': 0.7,
     'min_child_weight': 0,
     'alpha': 4,
@@ -51,7 +56,7 @@ params = {
     'scale_pos_weight': 9,
     'eval_metric': 'auc',
     'nthread': 18,
-    'random_state': 99, 
+    'random_state': 99,
     'silent': True
 }
 # get base line score
@@ -59,7 +64,7 @@ params = {
 dtrain = xgboost.DMatrix(df_train[features + new_features], df_train[target])
 # train
 model = xgboost.train(
-    params=params, 
+    params=params,
     dtrain=dtrain,
     num_boost_round=30,
     maximize=True,
@@ -79,13 +84,13 @@ while len(new_features):
     score_dict_temp = {}
     for feature_add in new_features:
         # prep data
-        dtrain = xgboost.DMatrix(df_train[features + [feature_add]], df_train[target])
+        dtrain = xgboost.DMatrix(df_train[features + [feature_add]], df_train[target])    # noqa
         print('done data prep!!!')
         t0 = time.time()
         ###################################################################
         # train
         model = xgboost.train(
-            params=params, 
+            params=params,
             dtrain=dtrain,
             num_boost_round=30,
             maximize=True,
@@ -97,20 +102,20 @@ while len(new_features):
         print('It took {} mins to train model'.format(t_min))
         ####################################################################
         # predict proba
-        proba = model.predict(xgboost.DMatrix(df_test[features + [feature_add]]))
+        proba = model.predict(xgboost.DMatrix(df_test[features + [feature_add]]))          # noqa
         roc_score = roc_auc_score(y_true=df_test[target], y_score=proba)
-        print('Out of sample roc score is {} removing {}'.format(roc_score, feature_add))
+        print('Out of sample roc score is {} removing {}'.format(roc_score, feature_add))  # noqa
         score_dict_temp = {**score_dict_temp, **{feature_add: roc_score}}
         # clean up
         del dtrain, model, proba
         gc.collect()
     #####################################################################
     # get the max score
-    feature_to_add = max(score_dict_temp.items(), key=operator.itemgetter(1))[0]
-    feature_add_score = max(score_dict_temp.items(), key=operator.itemgetter(1))[1]
+    feature_to_add = max(score_dict_temp.items(), key=operator.itemgetter(1))[0]           # noqa
+    feature_add_score = max(score_dict_temp.items(), key=operator.itemgetter(1))[1]        # noqa
     # update
     score_list.append((i, {feature_to_add: feature_add_score}))
     new_features.remove(feature_to_add)
 
 # save score
-gu.save_object(score_list, 'feature_score_v3.pkl')
+gu.save_object(score_list, 'forward_feature_score.pkl')

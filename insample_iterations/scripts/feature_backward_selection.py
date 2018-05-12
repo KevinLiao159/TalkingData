@@ -91,7 +91,7 @@ while len(new_features):
         ###################################################################
         # train
         model = xgboost.train(
-            params=params, 
+            params=params,
             dtrain=dtrain,
             num_boost_round=30,
             maximize=True,

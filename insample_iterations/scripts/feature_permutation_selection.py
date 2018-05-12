@@ -8,8 +8,17 @@ import gc
 from sklearn.metrics.scorer import roc_auc_score
 from sklearn.utils import shuffle
 import lightgbm
-# gravity imports
-import gravity_learn.utils as gu
+# klearn imports
+import klearn.utils as gu
+
+######################################
+# Idea:
+# 1. random permute each feature and get hold-out set score
+# 2. compare hold-out scores, the permuted feature that causes the
+#    biggest reduction in hold-out set score is the most important feature
+# 3. the permuted feature that helps improve hold-out set score should be
+#    removed from the feature set
+######################################
 
 # memory
 t0 = time.time()
@@ -20,9 +29,8 @@ print('Total memory in use before reading data: {:.02f} GB \
 
 ##################################################
 # read data
-##################################################
-df_train = pd.read_pickle('./input/train_v6.pkl')
-df_test = pd.read_pickle('./input/test_v6.pkl')
+df_train = pd.read_hdf('../data/train.hdf').astype('float32')
+df_test = pd.read_hdf('../data/test.hdf').astype('float32')
 # col
 target = 'is_attributed'
 features = [
@@ -38,24 +46,23 @@ features = [
     'ip_os_day_hour_clicks',
     'ip_device_day_hour_clicks',
     'ip_channel_day_hour_clicks',
-#     'app_day_hour_clicks',
-#    # 'app_os_day_hour_clicks',
-#     'app_device_day_hour_clicks',
-#     'app_channel_day_hour_clicks',
+    'app_day_hour_clicks',
+    # 'app_os_day_hour_clicks',
+    # 'app_device_day_hour_clicks',
+    # 'app_channel_day_hour_clicks',
+    # 'ip_day_clicks',
+    # 'ip_app_day_clicks',
+    # 'ip_os_day_clicks',
+    # 'ip_device_day_clicks',
+    # 'ip_channel_day_clicks',
+    # 'app_day_clicks',
+    # 'app_os_day_clicks',
+    # 'app_device_day_clicks',
+    # 'app_channel_day_clicks',
 
-#    # 'ip_day_clicks',
-#     'ip_app_day_clicks',
-#     'ip_os_day_clicks',
-#     'ip_device_day_clicks',
-#    # 'ip_channel_day_clicks',
-#    # 'app_day_clicks',
-#     'app_os_day_clicks',
-#     'app_device_day_clicks',
-#    # 'app_channel_day_clicks',
-
-#    # 'ip_app_os_day_clicks',
+    #  'ip_app_os_day_clicks',
     'ip_app_device_day_clicks',
-#     'ip_app_os_device_day_clicks',
+    # 'ip_app_os_device_day_clicks',
 
     'ip_day_test_hh_clicks',
     # 'app_day_test_hh_clicks',
@@ -177,9 +184,9 @@ gc.collect()
 # permutation test
 ##################################################
 for col in features:
-    df_train = pd.read_pickle('./input/train_v6.pkl')
-    df_test = pd.read_pickle('./input/test_v6.pkl')
-    df_train[col] = shuffle(df_train[col], random_state=1).reset_index(drop=True)
+    df_train = pd.read_hdf('../data/train.hdf').astype('float32')
+    df_test = pd.read_hdf('../data/test.hdf').astype('float32')
+    df_train[col] = shuffle(df_train[col], random_state=1).reset_index(drop=True)  # noqa
     df_test[col] = shuffle(df_test[col], random_state=1).reset_index(drop=True)
     # prep data
     dtrain = lightgbm.Dataset(
@@ -209,7 +216,7 @@ for col in features:
 ##################################################
 # save
 ##################################################
-gu.save_object(scores_dict, 'permutation_test_v6.pkl')
+gu.save_object(scores_dict, 'permute_feature_score.pkl')
 t1 = time.time()
 t_min = np.round((t1-t0) / 60, 2)
 print('It took {} mins to finish'.format(t_min))
