@@ -23,6 +23,7 @@ The complete file-structure for the project is as follows:
 TalkingData/
     README.md
     LICENSE
+    requirements.txt
     data/
         README.md
         train.csv
@@ -61,10 +62,14 @@ TalkingData/
             test.hdf
         scripts/
             dump_in_sample_data.py
-            feature_eng.py
+            feature_engineering.py
+            feature_univariate_selection.py
+            feature_forward_selection.py
+            feature_backward_selection.py
+            feature_permutation_selection.py
             train_model.py
     images/
-        ...too many
+        ...too many random plots
     reference/
         ...good stuff
 ```
