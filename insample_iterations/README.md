@@ -3,8 +3,7 @@
 Authors: **Kevin Liao**
 
 ### Objective
-This repository is responsible for in-sample data mining. We knew that Kaggle only allows maximum of five submission per day, which is good. Limiting iteration frequency in out-of-sample socring can help reduce chance of overfitting. However, we need a hold-out set for in-sample feature selection and model selection. And this repository is for in-sample data mining purpose.
-
+This is where the best practice happens in data science. This place is responsible for in-sample data mining. We knew that Kaggle only allows maximum of five submission per day, which is good. Limiting iteration frequency in out-of-sample socring can help reduce chance of overfitting. However, we need a hold-out set for in-sample feature selection and model selection. And this repository is for in-sample data mining purpose.
 
 ### File Structure
 
