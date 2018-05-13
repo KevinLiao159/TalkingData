@@ -48,7 +48,7 @@ TalkingData/
     eda_nb/
         basic_EDA.ipynb
         basic_EDA.html
-        better_EDA.ipynb (jtter plot)
+        better_EDA.ipynb
         better_EDA.html
         SHAP_toy_example.ipynb
         SHAP_toy_example.html
