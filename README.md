@@ -207,7 +207,7 @@ __Extra slight boost from ensembling__
 
 2. To be in *top 20%*, use solely LightGBM and trained (with some proper tuning) it on at least top 40 features from public kernels (must include time delta, count, unique count types aggregates with various feature groups)
 
-3. To be in *top 10%*, must have beast machine and train models with minimum of 100 proven-to-be-useful features or use NN models based on 20+ aggregate level features 
+3. To be in *top 10%*, must have beast machine (I am talking about at least 128G RAM) and train models with minimum of 100 proven-to-be-useful features or use NN models based on 20+ aggregate level features 
 
 4. To be in *top 5%*, all above + feature extraction (categorical feature embedding) or FM-like algos
 
