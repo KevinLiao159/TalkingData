@@ -82,9 +82,50 @@ TalkingData/
 
 ## Some thoughts
 
-This is my first Kaggle competition. I got myself ranked **top 3%** in *public leaderboard* just a week before the final submission deadline. My final submission is ranked **top 15%** in *private leaderboard*. It's so far one of the most competitive competion in which roughly 4000 kagglers participated. 
+Big thanks to sponsor *TalkingData* and *Kaggle* for providing such an interesting competition. Congradulations to those top teams and appreciations of kernal contributions from @Pranav Pandya and @anttip. This is my first Kaggle competition and I can tell you that I had so much fun being a part of it. I had a fulltime job and I knew that I can only commit my weekend free time to the competition. As a newby on kaggle, I did not anticipate a good LB score at all before going into the competition. Just one week right before the final submission deadline, I was so pumped up that I got myself solo ranked **top 3%** in *public LB*. However, that didn't last long, and my final submission is ranked **top 15%** in *private LB*, which I think it is a reasonable rank for me. Overall, I think this is one of the most competitive competition and it's very hard to get in **top 5%** without a team.
 
-It's a two month duration competition but I spent only about 80 hours in it because I have a full-time job and I can only kaggle during the weekend. Because time resource is too limited, I decided to implement just a single model (no blending/stacking) and my final submission is from that single model. I knew myself was at disadvantage and many other kagglers implements muliple models and blend them to form final submission. But I value this experience and I have learned more than what I expected before going into the competition.
+My results are shown below, I won't share too much my strategy because it's not a winning strategy anyway and most of my stuff is taken from public kernals. However, I will share what I have learned and what makes winning strategies.
+
+## My Model and LB score (AUC-ROC)
+model definition can be found in [scripts/train_lightgbm-v3.py](https://github.com/KevinLiao159/TalkingData/blob/master/scripts/train_lightgbm-v3.py)
+
+feature engineering can be found in [scripts/feature_eng-v3.py](https://github.com/KevinLiao159/TalkingData/blob/master/scripts/feature_eng-v3.py)
+
+  - **model1** LGBM with 42 (36 numerical, 6 categorical) features.
+
+|model|private score|public score|
+|---|---|---|
+| model V3 |0.9806721|0.9811112|
+
+
+## What I have learned kaggle competition winners?
+
+__We have to understand the game before wasting time.__
+
+In this compeition, the data set is huge but we only have six features. This means that 1). we need a lot of time in feature engineering 2). feature engineering and model validation cycle would take long time (because data is huge). Unless we have a good team, time resource allocation is crucial in this particular competition. A suggested time table will be like following:
+
+* 80% feature engineering
+* 10% making local validation as fast as possible
+* 5% hyper parameter tuning
+* 5% ensembling
+
+__Establishing a high speed research cycle is the key to win.__
+
+This competition is about training model in past historical data and predicting future fraudulant clicks. For future classification problem, using tradititonal five-fold cross-validation may not be a good strategy (or you have to be really careful about the timing and future information leakage).
+
+1. So a good practice research framework for this kind would be like following:
+
+    * Understanding that training data starts from day 7 and ends at day 9. Testing data is day 10, in hours of 4, 5, 9, 10, 13, 14.
+
+    * Introducing a insample hold-out set bright line. So we can enforce a bright line between day 8 and day 9 for insample research cycle.
+
+    * Training on day <= 8, and validating on both day 9 - hour 4 (mirror public LP), and day-9, hours 5, 9, 10, 13, 14 (mirror private LP).
+
+    * For out-of-sample (public LB score) iteration, we retrain on all data using 1.2 times the number of trees found by early stopping in insample validation
+
+2. 
+
+
 
 __Benefits of kaggling.__
 1. Adjust my bias (prior belief)
@@ -104,6 +145,27 @@ __What works in this competition.__
 1. don't trap in local minimum
 2. slow iteration in hyper-param tuning
 3. slow iteration in feature engineering
+
+
+
+learn that what makes a winning strategy
+__Cross Validation strat for future prediction.__
+
+__Feature engineering strategy.__
+1. for categorical -- factors, latent signlas, 
+2. brute force
+3. feature selection
+4. kaggle peers post
+
+__Run-time memory management strategy.__
+1. drop
+
+__negative down sample strategy.__
+1. model performance check
+
+__modeling strategy.__
+1. lightgbm
+2. bagging
 
 
 
