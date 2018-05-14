@@ -102,18 +102,18 @@ feature engineering can be found in [scripts/feature_eng-v3.py](https://github.c
 
 __We have to understand the game before wasting time.__
 
-In this compeition, the data set is huge but we only have six features. This means that 1). we need a lot of time in feature engineering 2). feature engineering and model validation cycle would take long time (because data is huge). Unless we have a good team, time resource allocation is crucial in this particular competition. A suggested time table will be like following [6th place solution](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56283):
+In this compeition, the data set is huge but we only have six features. This means that 1). we need to spend a lot of time in feature engineering 2). feature engineering and model validation cycle would take long time (because data is huge). Unless we have a good team, time resource allocation is crucial in this particular competition. A suggested time table will be like following [6th place solution](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56283):
 
 * 80% feature engineering
 * 10% making local validation as fast as possible
 * 5% hyper parameter tuning
 * 5% ensembling
 
-__Establishing a high speed research cycle is the key to win.__
+__Establishing a high speed research cycle is the key to win__
 
-This competition is about training model in past historical data and predicting future fraudulant clicks (which is a big-time imbalanced classification). For future classification problem, using tradititonal five-fold cross-validation may not be a good strategy (or you have to be really careful about the timing and future information leakage).
+This competition is about training model in past historical data and predicting future fraudulant clicks (which is a big-time imbalanced classification). For imbalanced future classification problem, using tradititonal five-fold cross-validation may not be a good strategy (or you have to be really careful about sampling ratio, the timing and future information leakage).
 
-1. Basic: a good practice research framework for this kind would be like following [6th place solution](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56283):
+1. Basic strategy: a good practice research framework for this kind would be like following [6th place solution](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56283):
 
     * Understanding that training data starts from day 7 and ends at day 9. Testing data is day 10, in hours of 4, 5, 9, 10, 13, 14.
 
@@ -123,7 +123,7 @@ This competition is about training model in past historical data and predicting 
 
     * For out-of-sample (public LB score) iteration, we retrain on all data using 1.2 times the number of trees found by early stopping in insample validation
 
-2. Advanced: a fast run-time and light weight memory usage iteration would be [1st place solution](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56475):
+2. Advanced strategy: a fast run-time and light weight memory usage iteration would be [1st place solution](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56475):
 
     * Understanding that there are 99.85% of negative examples in the data and dropping out tons of negative example DOES NOT deteriorate out-of-sample performance.
 
@@ -132,6 +132,14 @@ This competition is about training model in past historical data and predicting 
     * Using sample bagging technique, which means we bag five predictors trained on five sampled datasets created from different random seeds.
 
     * This technique allows us to use hundreds of features while keeping LGB training time less than 30 minutes.
+
+
+__Feature engineering the winning secret sauce__
+
+We have five original categorical features and one timestamp feature in the data set. Unless you have some crazy NN models with proper data preprocessing ([3rd place solution](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56262)), you definitely need some magic features to separate youself from the crowd. If you have no idea about how to engineer some new features, please see this [good feature engineering guidance](https://github.com/h2oai/h2o-meetups/blob/master/2017_11_29_Feature_Engineering/Feature%20Engineering.pdf).
+
+
+
 
 
 __Benefits of kaggling.__
