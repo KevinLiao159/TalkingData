@@ -82,9 +82,9 @@ TalkingData/
 
 ## Some thoughts
 
-Big thanks to sponsor *TalkingData* and *Kaggle* for providing such an interesting competition. Congradulations to those top teams and appreciations of kernal contributions from @Pranav Pandya and @anttip. This is my first Kaggle competition and I can tell you that I had so much fun being a part of it. I had a fulltime job and I knew that I can only commit my weekend free time to the competition. As a newby on kaggle, I did not anticipate a good LB score at all before going into the competition. Just one week right before the final submission deadline, I was so pumped up that I got myself solo ranked **top 3%** in *public LB*. However, that didn't last long, and my final submission is ranked **top 15%** in *private LB*, which I think it is a reasonable rank for me. Overall, I think this is one of the most competitive competition and it's very hard to get in **top 5%** without a team.
+Big thanks to sponsor *TalkingData* and *Kaggle* for providing such an interesting competition. Congradulations to those top teams and appreciations of kernal contributions from @Pranav Pandya and @anttip. This is my first Kaggle competition and I can't tell you how much fun for me being a part of it. I had a fulltime job and I knew that I can only commit my weekend free time to the competition. As a newby on kaggle, I did not anticipate a good LB score at all before going into the competition. Just one week right before the final submission deadline, I was so pumped up that I got myself solo ranked **top 3%** in *public LB*. However, that didn't last long, and my final submission is ranked **top 15%** in *private LB*, which I think it is a reasonable rank for me. Overall, I think this is one of the most competitive competition and it's very hard to get in **top 5%** without a team.
 
-My results are shown below, I won't share too much my strategy because it's not a winning strategy anyway and most of my stuff is taken from public kernals. However, I will share what I have learned and what makes winning strategies.
+My results are shown below, I won't share too much about my strategy because it's not a winning strategy anyway and most of my stuff is taken from public kernels. However, I will share what I have learned and what makes a winning strategy.
 
 ## My Model and LB score (AUC-ROC)
 model definition can be found in [scripts/train_lightgbm-v3.py](https://github.com/KevinLiao159/TalkingData/blob/master/scripts/train_lightgbm-v3.py)
@@ -98,11 +98,11 @@ feature engineering can be found in [scripts/feature_eng-v3.py](https://github.c
 | model V3 |0.9806721|0.9811112|
 
 
-## What I have learned kaggle competition winners?
+## What I have learned from kaggle competition winners?
 
 __We have to understand the game before wasting time.__
 
-In this compeition, the data set is huge but we only have six features. This means that 1). we need a lot of time in feature engineering 2). feature engineering and model validation cycle would take long time (because data is huge). Unless we have a good team, time resource allocation is crucial in this particular competition. A suggested time table will be like following:
+In this compeition, the data set is huge but we only have six features. This means that 1). we need a lot of time in feature engineering 2). feature engineering and model validation cycle would take long time (because data is huge). Unless we have a good team, time resource allocation is crucial in this particular competition. A suggested time table will be like following [6th place solution](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56283):
 
 * 80% feature engineering
 * 10% making local validation as fast as possible
@@ -111,9 +111,9 @@ In this compeition, the data set is huge but we only have six features. This mea
 
 __Establishing a high speed research cycle is the key to win.__
 
-This competition is about training model in past historical data and predicting future fraudulant clicks. For future classification problem, using tradititonal five-fold cross-validation may not be a good strategy (or you have to be really careful about the timing and future information leakage).
+This competition is about training model in past historical data and predicting future fraudulant clicks (which is a big-time imbalanced classification). For future classification problem, using tradititonal five-fold cross-validation may not be a good strategy (or you have to be really careful about the timing and future information leakage).
 
-1. So a good practice research framework for this kind would be like following:
+1. Basic: a good practice research framework for this kind would be like following [6th place solution](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56283):
 
     * Understanding that training data starts from day 7 and ends at day 9. Testing data is day 10, in hours of 4, 5, 9, 10, 13, 14.
 
@@ -123,8 +123,15 @@ This competition is about training model in past historical data and predicting 
 
     * For out-of-sample (public LB score) iteration, we retrain on all data using 1.2 times the number of trees found by early stopping in insample validation
 
-2. 
+2. Advanced: a fast run-time and light weight memory usage iteration would be [1st place solution](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56475):
 
+    * Understanding that there are 99.85% of negative examples in the data and dropping out tons of negative example DOES NOT deteriorate out-of-sample performance.
+
+    * Using negative down-sampling strategy, which means that we use all positive examples (i.e., is_attributed == 1) and down-sampled negative examples on model training. We down-sampled negative examples such that their size becomes equal to the number of positive ones. It discards about 99.8% of negative examples.
+
+    * Using sample bagging technique, which means we bag five predictors trained on five sampled datasets created from different random seeds.
+
+    * This technique allows us to use hundreds of features while keeping LGB training time less than 30 minutes.
 
 
 __Benefits of kaggling.__
