@@ -93,7 +93,7 @@ feature engineering can be found in [scripts/feature_eng-v3.py](https://github.c
 
   - **model** LGBM with 42 (36 numerical, 6 categorical) features.
 
-|model|private score|public score|final rank| 
+|model|public score|private score|final rank| 
 |---|---|---|---|
 | model V3 |0.9806721|0.9811112| 585th (*top15%*)|
 
