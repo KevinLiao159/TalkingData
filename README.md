@@ -154,7 +154,7 @@ Here are some general ideas taken from top winners:
 
 * encode timestamp into day and hour
 
-* user concepts: ip, device, os triplets
+* user concepts: ip, device, os triplets (app is product concept)
 
 * (require brute-force) aggregates on various feature groups (click series-based feature sets (i.e., each feature set consists of 31 (=(2^5) - 1) features)) [1st place solution](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56475)
     * count features, unique count features, cumcount features
