@@ -144,7 +144,7 @@ This competition is about training model in past historical data and predicting 
     * Discard features that increase the gap between pulic LB score and insample hold-out score even though it increases your insample hold-out score
 
 
-__Feature engineering the winning secret sauce__
+__Feature engineering is the winning secret sauce__
 
 We have five original categorical features and one timestamp feature in the data set. Unless you have some crazy NN models with proper data preprocessing ([3rd place solution](https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/discussion/56262)), you definitely need some magic features to separate youself from the crowd. If you have no idea about how to engineer some new features, please see this [good feature engineering guidance](https://github.com/h2oai/h2o-meetups/blob/master/2017_11_29_Feature_Engineering/Feature%20Engineering.pdf).
 
